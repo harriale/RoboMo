@@ -2,16 +2,23 @@ const express = require('express');
 const { Client } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
-// REMOVED: const url = require('url');
+const url = require('url');
 
 app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
-// UPDATED: Using your clarified password directly, no url.parse()
-const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres'; 
+// UPDATED: Added ?sslmode=require to the connection string
+const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres?sslmode=require'; 
+
+const params = url.parse(connectionString);
+const auth = params.auth.split(':');
 
 const client = new Client({
-  connectionString: connectionString, // Pass the string directly
+  user: auth[0],
+  password: auth[1],
+  host: params.hostname,
+  port: params.port,
+  database: params.pathname.split('/')[1],
   ssl: {
     rejectUnauthorized: false 
   }
