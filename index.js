@@ -2,26 +2,20 @@ const express = require('express');
 const { Client } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
-const url = require('url');
+// Removed: const url = require('url'); // No longer needed for url.parse
 
 app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
+// Using the full connection string directly, with password and sslmode=require
 const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres?sslmode=require'; 
 
-const params = url.parse(connectionString);
-const auth = params.auth.split(':');
-
 const client = new Client({
-  user: auth[0],
-  password: auth[1],
-  host: params.hostname,
-  port: params.port,
-  database: params.pathname.split('/')[1],
-  family: 4, // ADDED: Force IPv4
+  connectionString: connectionString, // Pass the entire connection string here
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false // Keep this as false for Render/Supabase connection
+  },
+  family: 4 // ADDED: Force IPv4 resolution
 });
 
 client.connect(err => {
@@ -107,21 +101,3 @@ app.post('/book', async (req, res) => {
   try {
     const sql = `INSERT INTO bookings (service, date, time, user_id) VALUES ($1, $2, $3, $4) RETURNING id`;
     const params = [service, date, time, user_id];
-    
-    const result = await client.query(sql, params);
-    const newBookingId = result.rows[0].id;
-
-    console.log(`✅ Booking saved with ID: ${newBookingId} for user ${user_id} in PostgreSQL`);
-    res.status(201).json({ message: 'Booking received and saved successfully!', bookingId: newBookingId });
-
-  } catch (err) {
-    console.error('❌ Error saving booking:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// --- Start the server ---
-app.listen(port, '0.0.0.0', () => {
-  console.log(`✅ Backend server is running on port ${port} (0.0.0.0)`);
-});
