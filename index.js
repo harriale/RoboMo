@@ -7,7 +7,7 @@ const url = require('url'); // ADDED: Import the url module
 app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
-const connectionString = 'postgresql://postgres:SZandErs1976%23%2B%23@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres'; // Your full connection string
+const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres'; // Your full connection string
 
 // Explicitly parse the connection string
 const params = url.parse(connectionString);
