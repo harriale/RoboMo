@@ -101,3 +101,21 @@ app.post('/book', async (req, res) => {
   try {
     const sql = `INSERT INTO bookings (service, date, time, user_id) VALUES ($1, $2, $3, $4) RETURNING id`;
     const params = [service, date, time, user_id];
+    
+    const result = await client.query(sql, params);
+    const newBookingId = result.rows[0].id;
+
+    console.log(`✅ Booking saved with ID: ${newBookingId} for user ${user_id} in PostgreSQL`);
+    res.status(201).json({ message: 'Booking received and saved successfully!', bookingId: newBookingId });
+
+  } catch (err) {
+    console.error('❌ Error saving booking:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// --- Start the server ---
+app.listen(port, '0.0.0.0', () => {
+  console.log(`✅ Backend server is running on port ${port} (0.0.0.0)`);
+});
