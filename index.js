@@ -2,25 +2,18 @@ const express = require('express');
 const { Client } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
-const url = require('url'); // ADDED: Import the url module
+// REMOVED: const url = require('url');
 
 app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
-const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres'; // Your full connection string
-
-// Explicitly parse the connection string
-const params = url.parse(connectionString);
-const auth = params.auth.split(':'); // Split user and password
+// UPDATED: Using your clarified password directly, no url.parse()
+const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres'; 
 
 const client = new Client({
-  user: auth[0],
-  password: auth[1],
-  host: params.hostname,
-  port: params.port,
-  database: params.pathname.split('/')[1],
+  connectionString: connectionString, // Pass the string directly
   ssl: {
-    rejectUnauthorized: false // Set back to false, as explicit parsing should handle connection
+    rejectUnauthorized: false 
   }
 });
 
