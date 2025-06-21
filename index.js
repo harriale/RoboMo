@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client } = require('pg'); // Import the PostgreSQL client
+const { Client } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -7,9 +7,10 @@ app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
 const client = new Client({
-  connectionString: 'postgresql://postgres:SZandErs1976#+#@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres', // YOUR FULL CONNECTION STRING HERE
+  // UPDATED: Using the URL-encoded password
+  connectionString: 'postgresql://postgres:SZandErs1976%23%2B%23@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres', 
   ssl: {
-    rejectUnauthorized: false // Required for connecting to Supabase from Render/Vercel (accept self-signed certs)
+    rejectUnauthorized: false
   }
 });
 
@@ -20,7 +21,6 @@ client.connect(err => {
   }
   console.log('✅ Connected to PostgreSQL database.');
 
-  // --- Create Table on Startup (PostgreSQL syntax) ---
   client.query(`
     CREATE TABLE IF NOT EXISTS bookings (
       id SERIAL PRIMARY KEY,
@@ -38,7 +38,6 @@ client.connect(err => {
     }
   });
 });
-// ---------------------------------------------------
 
 
 const ALL_POSSIBLE_TIMES = [
@@ -53,7 +52,6 @@ app.get('/', (req, res) => {
   res.send('Hello from the Booking App Backend!');
 });
 
-// --- UPDATED: Route to view all bookings (PostgreSQL) ---
 app.get('/bookings', async (req, res) => {
   try {
     const result = await client.query("SELECT * FROM bookings ORDER BY date, time, created_at");
@@ -64,7 +62,6 @@ app.get('/bookings', async (req, res) => {
   }
 });
 
-// --- UPDATED: Route to get available times for a specific date (PostgreSQL) ---
 app.get('/availability', async (req, res) => {
   const { date } = req.query;
   if (!date) {
@@ -72,17 +69,16 @@ app.get('/availability', async (req, res) => {
   }
 
   try {
-    // Get booked times for the given date from PostgreSQL
-    const sql = `SELECT time FROM bookings WHERE date = $1`; // Use $1 for parameter
+    const sql = `SELECT time FROM bookings WHERE date = $1`;
     const result = await client.query(sql, [date]);
     const bookedTimes = result.rows.map(row => row.time);
-
+    
     console.log(`Booked times for ${date}:`, bookedTimes);
 
     const availableTimes = ALL_POSSIBLE_TIMES.filter(
       (slot) => !bookedTimes.includes(slot.time)
     );
-
+    
     console.log(`Returning available times for ${date}:`, availableTimes);
     res.json(availableTimes);
 
@@ -92,7 +88,6 @@ app.get('/availability', async (req, res) => {
   }
 });
 
-// --- UPDATED: Route to create a new booking (PostgreSQL) ---
 app.post('/book', async (req, res) => {
   const { service, date, time, user_id } = req.body;
   if (!service || !date || !time || !user_id) {
@@ -100,11 +95,11 @@ app.post('/book', async (req, res) => {
   }
 
   try {
-    const sql = `INSERT INTO bookings (service, date, time, user_id) VALUES ($1, $2, $3, $4) RETURNING id`; // Use $1, $2 etc. and RETURNING id
+    const sql = `INSERT INTO bookings (service, date, time, user_id) VALUES ($1, $2, $3, $4) RETURNING id`;
     const params = [service, date, time, user_id];
-
+    
     const result = await client.query(sql, params);
-    const newBookingId = result.rows[0].id; // Get the ID of the new booking
+    const newBookingId = result.rows[0].id;
 
     console.log(`✅ Booking saved with ID: ${newBookingId} for user ${user_id} in PostgreSQL`);
     res.status(201).json({ message: 'Booking received and saved successfully!', bookingId: newBookingId });
