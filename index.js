@@ -7,10 +7,9 @@ app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
 const client = new Client({
-  // UPDATED: Using the URL-encoded password
-  connectionString: 'postgresql://postgres:SZandErs1976%23%2B%23@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres', 
+  connectionString: 'postgresql://postgres:SZandErs1976#+#@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres', 
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: true // CHANGED: from false to true
   }
 });
 
