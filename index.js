@@ -7,7 +7,6 @@ const url = require('url');
 app.use(express.json());
 
 // --- PostgreSQL Database Setup ---
-// UPDATED: Added ?sslmode=require to the connection string
 const connectionString = 'postgresql://postgres:SZandErs1976E@db.hlpxfefnjclsudjyykvx.supabase.co:5432/postgres?sslmode=require'; 
 
 const params = url.parse(connectionString);
@@ -19,8 +18,9 @@ const client = new Client({
   host: params.hostname,
   port: params.port,
   database: params.pathname.split('/')[1],
+  family: 4, // ADDED: Force IPv4
   ssl: {
-    rejectUnauthorized: false 
+    rejectUnauthorized: false
   }
 });
 
